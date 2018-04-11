@@ -1,0 +1,108 @@
+#include "pfm.h"
+#include "stdio.h"
+
+
+PagedFileManager* PagedFileManager::_pf_manager = 0;
+
+PagedFileManager* PagedFileManager::instance() {
+    if(!_pf_manager)
+        _pf_manager = new PagedFileManager();
+
+    return _pf_manager;
+}
+
+
+PagedFileManager::PagedFileManager() {
+}
+
+
+PagedFileManager::~PagedFileManager() {
+}
+
+
+RC PagedFileManager::createFile(const string &fileName) {
+    FILE * file; 
+    file = openFile(fileName, "r");
+    if (file == NULL) {
+        closeFile(fileName);
+        file = openFile(fileName, "w");
+    } else { 
+        cout << fileName << " already exists";
+    }
+    closeFile(fileName);
+    return -1;
+}
+
+
+RC PagedFileManager::destroyFile(const string &fileName) {
+    FILE * file = openFile(fileName, "r");
+    if(file == NULL) {
+        cout <<  fileName << " does not exist";
+    } else  {
+        closeFile(fileName);
+        remove(fileName);
+    }
+    return 0;
+}
+
+
+RC PagedFileManager::openFile(const string &fileName, FileHandle &fileHandle) {
+    FILE* fpOpenFile = fopen(fileName, fileHandle);
+    
+    if (fpOpenFile == NULL) {
+        cout << "Failed to open " << fileName;
+        return -1;
+    } 
+
+    return openedFile;
+}
+
+
+RC PagedFileManager::closeFile(FileHandle &fileHandle) {
+    FILE fpCloseFile = openFile(fileHandle, "r");
+    if (fpCloseFile == NULL ){
+         cout << "Failed to close " << fileHandle;
+         return -1;
+    } else {
+         fclose(fileHandle);
+    }
+    return 0;
+}
+
+
+FileHandle::FileHandle() {
+	readPageCounter = 0;
+	writePageCounter = 0;
+	appendPageCounter = 0;
+}
+
+
+FileHandle::~FileHandle() {
+
+}
+
+
+RC FileHandle::readPage(PageNum pageNum, void *data) {
+    
+    return -1;
+}
+
+
+RC FileHandle::writePage(PageNum pageNum, const void *data) {
+    return -1;
+}
+
+
+RC FileHandle::appendPage(const void *data) {
+    return -1;
+}
+
+
+unsigned FileHandle::getNumberOfPages() {
+    return -1;
+}
+
+
+RC FileHandle::collectCounterValues(unsigned &readPageCount, unsigned &writePageCount, unsigned &appendPageCount) {
+	return -1;
+}
