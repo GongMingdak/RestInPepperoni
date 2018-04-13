@@ -21,35 +21,56 @@ PagedFileManager::~PagedFileManager() {
 
 
 RC PagedFileManager::createFile(const string &fileName) {
-    FILE * fpCreateFile = fopen(fileName.c_str, "r");
+    //checks if file does not exist
+    FILE * fpCreateFile = fopen(fileName.c_str(), "r");
     if (fpCreateFile== NULL) {
+        //if it does create file
         fclose(fpCreateFile);
-        file = fopen(fileName.c_str, "w");
-    } else { 
-        printf(fileName.c_str + " already exists");
+        fpCreateFile = fopen(fileName.c_str(), "w");
+        if(fpCreateFile == NULL){
+            //did not create file
+            return -1;
+        }
+        return 0;
+    } else {
+        //don't create file
+        printf("File already exists");
     }
-    fclose(fileName.c_str);
-    return 0;
+    fclose(fpCreateFile);
+    return -1;
 }
 
 
 RC PagedFileManager::destroyFile(const string &fileName) {
-    FILE * fpDestroyFile = openFile(fileName.c_str, "r");
+    //checks if file does not exist
+    FILE * fpDestroyFile = fopen(fileName.c_str(), "r");
     if(fpDestroyFile == NULL) {
-        fprint (fileName.c_str + " does not exist");
+        //if it does not, do nothing
+        printf("File does not exist");
+        return -1;
     } else  {
+        //else it destroys
         fclose(fpDestroyFile);
-        remove(fileName.c_str);
+        remove(fileName.c_str());
     }
     return 0;
 }
 
 
 RC PagedFileManager::openFile(const string &fileName, FileHandle &fileHandle) {
-    FILE * fpOpenFile = fopen(fileName.c_str, fileHandle);
-    if (fpOpenFile == NULL) {
-        fprint ("Failed to open " + fileName.c_str);
+    //opens file
+    if(fileHandle.openFile != NULL){
+        //file is already opened
         return -1;
+    }
+    //checks if it exists
+    FILE * fpOpenFile = fopen(fileName.c_str(), "r+");
+    if (fpOpenFile == NULL) {
+        printf ("Failed to open file");
+        return -1;
+    } else {
+        fileHandle.openFile = fpOpenFile;
+        //filesize
     }
 
     return 0;
@@ -57,26 +78,34 @@ RC PagedFileManager::openFile(const string &fileName, FileHandle &fileHandle) {
 
 
 RC PagedFileManager::closeFile(FileHandle &fileHandle) {
-    FILE * fpCloseFile = openFile(fileHandle.c_str, "r");
+    if(fileHandle.openFile == NULL){
+        //file was never opened
+        return -1;
+    }
+    FILE * fpCloseFile = fileHandle.openFile;
     if (fpCloseFile == NULL ){
-         fprint("Failed to close " + fileHandle);
+         printf("Failed to close file");
          return -1;
     } else {
-         fclose(fileHandle);
+         fclose(fileHandle.openFile);
+         fileHandle.openFile = NULL;
     }
+    fclose(fpCloseFile);
     return 0;
 }
 
 
 FileHandle::FileHandle() {
-	readPageCounter = 0;
-	writePageCounter = 0;
-	appendPageCounter = 0;
+    readPageCounter = 0;
+    writePageCounter = 0;
+    appendPageCounter = 0;
+    fileSize = 0;
+    openFile = NULL;
 }
 
 
 FileHandle::~FileHandle() {
-
+    
 }
 
 
